@@ -1,177 +1,459 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FTECH - Dashboard Performance V6</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
     <style>
-        :root { --moov-blue: #005bac; --moov-orange: #ff9900; }
-        body { background-color: #f1f3f5; font-family: 'Segoe UI', system-ui, -apple-system; overflow-x: hidden; }
-        .navbar { background: var(--moov-blue); border-bottom: 4px solid var(--moov-orange); }
-        
-        /* KPI Cards Responsives */
-        .kpi-card { border-radius: 12px; border: none; color: white; padding: 15px; text-align: center; margin-bottom: 10px; transition: transform 0.2s; }
-        .kpi-card:hover { transform: translateY(-5px); }
-        .bg-6h { background: #1b5e20; } .bg-12h { background: #2e7d32; }
-        .bg-24h { background: #f9a825; } .bg-over { background: #c62828; }
-        
-        /* Graphiques Responsives */
-        .chart-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 320px; margin-bottom: 20px; }
-        
-        .main-table { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
-        .table-responsive { max-height: 500px; font-size: 0.85rem; }
-        .sticky-th { position: sticky; top: 0; background: #f8f9fa; z-index: 10; border-bottom: 2px solid #dee2e6; }
-        
-        .incident-details { display: none; background: #f8f9fa; border-top: 3px solid var(--moov-blue); }
+      :root {
+        --moov-blue: #005bac;
+        --moov-orange: #ff9900;
+      }
+      body {
+        background-color: #f1f3f5;
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system;
+        overflow-x: hidden;
+      }
+      .navbar {
+        background: var(--moov-blue);
+        border-bottom: 4px solid var(--moov-orange);
+      }
 
-        /* Media Queries pour Mobile */
-        @media (max-width: 768px) {
-            .navbar-brand { font-size: 1rem; }
-            .chart-card { height: 280px; }
-            #actionBtns { flex-wrap: wrap; }
-            .btn-sm { padding: 0.25rem 0.4rem; font-size: 0.75rem; }
+      /* KPI Cards Responsives */
+      .kpi-card {
+        border-radius: 12px;
+        border: none;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 10px;
+        transition: transform 0.2s;
+      }
+      .kpi-card:hover {
+        transform: translateY(-5px);
+      }
+      .bg-6h {
+        background: #1b5e20;
+      }
+      .bg-12h {
+        background: #2e7d32;
+      }
+      .bg-24h {
+        background: #f9a825;
+      }
+      .bg-over {
+        background: #c62828;
+      }
+
+      /* Graphiques Responsives */
+      .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        height: 320px;
+        margin-bottom: 20px;
+      }
+
+      .main-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+      .table-responsive {
+        max-height: 500px;
+        font-size: 0.85rem;
+      }
+      .sticky-th {
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        z-index: 10;
+        border-bottom: 2px solid #dee2e6;
+      }
+
+      .incident-details {
+        display: none;
+        background: #f8f9fa;
+        border-top: 3px solid var(--moov-blue);
+      }
+
+      /* Media Queries pour Mobile */
+      @media (max-width: 768px) {
+        .navbar-brand {
+          font-size: 1rem;
         }
+        .chart-card {
+          height: 280px;
+        }
+        #actionBtns {
+          flex-wrap: wrap;
+        }
+        .btn-sm {
+          padding: 0.25rem 0.4rem;
+          font-size: 0.75rem;
+        }
+      }
     </style>
-</head>
-<body>
-
-<nav class="navbar navbar-dark shadow-sm sticky-top">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-        <span class="navbar-brand fw-bold mb-0"><i class="fas fa-satellite-dish me-2"></i> FTECH V6</span>
-        <div id="actionBtns" style="display:none" class="d-flex gap-1">
-            <button class="btn btn-outline-light btn-sm" onclick="sendToGmail()" title="Gmail"><i class="fas fa-envelope"></i></button>
-            <button class="btn btn-success btn-sm" onclick="exportExcel()" title="Excel"><i class="fas fa-file-excel"></i></button>
-            <button class="btn btn-danger btn-sm" onclick="generatePPT()" title="PPTX"><i class="fas fa-file-powerpoint"></i></button>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark shadow-sm sticky-top">
+      <div
+        class="container-fluid d-flex justify-content-between align-items-center"
+      >
+        <span class="navbar-brand fw-bold mb-0"
+          ><i class="fas fa-satellite-dish me-2"></i> FTECH V6</span
+        >
+        <div id="actionBtns" style="display: none" class="d-flex gap-1">
+          <button
+            class="btn btn-outline-light btn-sm"
+            onclick="sendToGmail()"
+            title="Gmail"
+          >
+            <i class="fas fa-envelope"></i>
+          </button>
+          <button
+            class="btn btn-success btn-sm"
+            onclick="exportExcel()"
+            title="Excel"
+          >
+            <i class="fas fa-file-excel"></i>
+          </button>
+          <button
+            class="btn btn-danger btn-sm"
+            onclick="generatePPT()"
+            title="PPTX"
+          >
+            <i class="fas fa-file-powerpoint"></i>
+          </button>
         </div>
-    </div>
-</nav>
+      </div>
+    </nav>
 
-<div class="container-fluid p-3 p-md-4">
-    <div id="dropZone" class="card border-2 border-dashed p-4 p-md-5 text-center mb-4 bg-white shadow-sm" style="cursor:pointer; border-style: dashed !important;" onclick="document.getElementById('fileIn').click()">
-        <input type="file" id="fileIn" hidden onchange="handleFile(event)">
+    <div class="container-fluid p-3 p-md-4">
+      <div
+        id="dropZone"
+        class="card border-2 border-dashed p-4 p-md-5 text-center mb-4 bg-white shadow-sm"
+        style="cursor: pointer; border-style: dashed !important"
+        onclick="document.getElementById('fileIn').click()"
+      >
+        <input type="file" id="fileIn" hidden />
         <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
         <h4>Importer le fichier de clôture</h4>
-        <p class="text-muted d-none d-md-block">Analyse automatique des SLA, Équipes et Localisations</p>
-    </div>
+        <p class="text-muted d-none d-md-block">
+          Analyse automatique des SLA, Équipes et Localisations
+        </p>
+      </div>
 
-    <div id="dashContent" style="display:none">
+      <div id="dashContent" style="display: none">
         <div class="row g-2 mb-4">
-            <div class="col-6 col-md-3"><div class="kpi-card bg-6h"><h6>SLA < 6H</h6><h2 id="k6">0</h2></div></div>
-            <div class="col-6 col-md-3"><div class="kpi-card bg-12h"><h6>6H-12H</h6><h2 id="k12">0</h2></div></div>
-            <div class="col-6 col-md-3"><div class="kpi-card bg-24h"><h6>12H-24H</h6><h2 id="k24">0</h2></div></div>
-            <div class="col-6 col-md-3"><div class="kpi-card bg-over"><h6>> 24H</h6><h2 id="kOver">0</h2></div></div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card bg-6h">
+              <h6>SLA < 6H</h6>
+              <h2 id="k6">0</h2>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card bg-12h">
+              <h6>6H-12H</h6>
+              <h2 id="k12">0</h2>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card bg-24h">
+              <h6>12H-24H</h6>
+              <h2 id="k24">0</h2>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card bg-over">
+              <h6>> 24H</h6>
+              <h2 id="kOver">0</h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- clients-by-SLA row removed as requested -->
+
+        <div class="row g-2 mb-3">
+          <div class="col-12">
+            <div class="row g-2">
+              <div class="col-6 col-md-3">
+                <div class="kpi-card bg-6h">
+                  <h6>Assign→Relève &lt;6h (clients)</h6>
+                  <h2 id="kCAssign6">0</h2>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-card bg-12h">
+                  <h6>Assign→Relève 6-12h (clients)</h6>
+                  <h2 id="kCAssign12">0</h2>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-card bg-24h">
+                  <h6>Assign→Relève 12-24h (clients)</h6>
+                  <h2 id="kCAssign24">0</h2>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="kpi-card bg-over">
+                  <h6>Assign→Relève &gt;24h (clients)</h6>
+                  <h2 id="kCAssignOver">0</h2>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="chart-card"><h6>Villes</h6><canvas id="chartLoc"></canvas></div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="chart-card">
+              <h6>Villes</h6>
+              <canvas id="chartLoc"></canvas>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="chart-card"><h6>Causes</h6><canvas id="chartCause"></canvas></div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="chart-card">
+              <h6>Causes</h6>
+              <canvas id="chartCause"></canvas>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="chart-card"><h6>Équipes</h6><canvas id="chartEquipe"></canvas></div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="chart-card">
+              <h6>Équipes</h6>
+              <canvas id="chartEquipe"></canvas>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="chart-card"><h6>SLA %</h6><canvas id="chartPie"></canvas></div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="chart-card">
+              <h6>SLA %</h6>
+              <canvas id="chartPie"></canvas>
             </div>
+          </div>
         </div>
 
         <div class="main-table">
-            <div class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                <span class="fw-bold text-primary">LISTE DES INCIDENTS</span>
-                <input type="text" id="searchTable" class="form-control form-control-sm w-100 w-md-25" placeholder="Rechercher client ou ligne..." onkeyup="filterTable()">
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="dataTable">
-                    <thead class="sticky-th">
-                        <tr>
-                            <th></th><th>Ticket</th><th>Ligne</th><th>Client</th><th class="d-none d-md-table-cell">Ville</th><th>Délai</th><th>SLA</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tBody"></tbody>
-                </table>
-            </div>
+          <div
+            class="p-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2"
+          >
+            <span class="fw-bold text-primary">LISTE DES INCIDENTS</span>
+            <input
+              type="text"
+              id="searchTable"
+              class="form-control form-control-sm w-100 w-md-25"
+              placeholder="Rechercher client ou ligne..."
+              onkeyup="filterTable()"
+            />
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="dataTable">
+              <thead class="sticky-th">
+                <tr>
+                  <th></th>
+                  <th>Ticket</th>
+                  <th>Ligne</th>
+                  <th>Client</th>
+                  <th class="d-none d-md-table-cell">Ville</th>
+                  <th>Délai</th>
+                  <th>Assign→Relève</th>
+                  <th>SLA</th>
+                </tr>
+              </thead>
+              <tbody id="tBody"></tbody>
+            </table>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<script>
-let processedData = [];
-let charts = {};
+    <script>
+      let processedData = [];
+      let charts = {};
 
-function handleFile(e) {
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-        const wb = XLSX.read(evt.target.result, {type:'binary'});
-        const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        process(data);
-    };
-    reader.readAsBinaryString(e.target.files[0]);
-}
+      function handleFile(e) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const wb = XLSX.read(evt.target.result, { type: "binary" });
+          const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+          process(data);
+        };
+        reader.readAsBinaryString(e.target.files[0]);
+      }
 
-function parseDateTime(dateVal, timeVal) {
-    if (!dateVal) return moment(null);
-    let combined = dateVal;
-    if (timeVal) combined = `${dateVal} ${timeVal}`;
-    return moment(combined, ["YYYY-MM-DD HH:mm:ss", "DD/MM/YYYY HH:mm:ss", "YYYY-MM-DD", "DD/MM/YYYY"]);
-}
+      function parseDateTime(dateVal, timeVal) {
+        if (!dateVal) return moment(null);
+        let combined = dateVal;
+        if (timeVal) combined = `${dateVal} ${timeVal}`;
+        return moment(combined, [
+          "YYYY-MM-DD HH:mm:ss",
+          "DD/MM/YYYY HH:mm:ss",
+          "YYYY-MM-DD",
+          "DD/MM/YYYY",
+        ]);
+      }
 
-function process(rows) {
-    let stats = { k6:0, k12:0, k24:0, kOver:0, locs:{}, causes:{}, equipes:{} };
-    processedData = [];
+      function process(rows) {
+        let stats = {
+          k6: 0,
+          k12: 0,
+          k24: 0,
+          kOver: 0,
+          locs: {},
+          causes: {},
+          equipes: {},
+          assignSum: 0,
+          assignCount: 0,
+          assignMissingCount: 0,
+          // incident counts based on assign->relève
+          assignInc: { k6: 0, k12: 0, k24: 0, kOver: 0 },
+          clientsBySLAAssign: {
+            k6: new Set(),
+            k12: new Set(),
+            k24: new Set(),
+            kOver: new Set(),
+          },
+        };
+        processedData = [];
 
-    rows.forEach(r => {
-        const start = parseDateTime(r["Date et Heure de signalisation"] || r["Date de signalisation"], r["Heure de signalisation"]);
-        const end = parseDateTime(r["Date et heure de relève dérangement"] || r["Date et heure de résolution"], r["Heure de résolution"]);
-        
-        if(start.isValid() && end.isValid()) {
-            const h = end.diff(start, 'hours', true);
-            let sla = h <= 6 ? "<6h" : h <= 12 ? "6-12h" : h <= 24 ? "12-24h" : ">24h";
+        rows.forEach((r) => {
+          const start = parseDateTime(
+            r["Date et Heure de signalisation"] || r["Date de signalisation"],
+            r["Heure de signalisation"],
+          );
+          const end = parseDateTime(
+            r["Date et heure de relève dérangement"] ||
+              r["Date et heure de résolution"],
+            r["Heure de résolution"],
+          );
 
-            if(h <= 6) stats.k6++; else if(h <= 12) stats.k12++; else if(h <= 24) stats.k24++; else stats.kOver++;
+          // compute main durations if possible
+          const validStartEnd = start.isValid() && end.isValid();
+          if (validStartEnd) {
+            const h = end.diff(start, "hours", true);
+            let sla =
+              h <= 6 ? "<6h" : h <= 12 ? "6-12h" : h <= 24 ? "12-24h" : ">24h";
+
+            if (h <= 6) stats.k6++;
+            else if (h <= 12) stats.k12++;
+            else if (h <= 24) stats.k24++;
+            else stats.kOver++;
 
             const loc = r["LOCALISATION"] || "N/A";
             const cause = r["Cause du dérangement"] || "Inconnue";
             const eq = r["Equipes"] || r["equipe"] || "N/A";
+
+            // assignment -> relève calculation (columns may vary)
+            const assign = parseDateTime(
+              r["Date et heure d'assignation"] || r["Date d'assignation"],
+              r["Heure d'assignation"],
+            );
+            let assignH = null;
+            const assignValid = assign && assign.isValid();
+            if (!assignValid)
+              stats.assignMissingCount = (stats.assignMissingCount || 0) + 1;
+            if (assignValid && end.isValid()) {
+              assignH = end.diff(assign, "hours", true);
+              stats.assignSum += assignH;
+              stats.assignCount += 1;
+              // incident bucket based on assign->relève
+              if (assignH <= 6) stats.assignInc.k6++;
+              else if (assignH <= 12) stats.assignInc.k12++;
+              else if (assignH <= 24) stats.assignInc.k24++;
+              else stats.assignInc.kOver++;
+            }
+
+            // Track unique clients per SLA (main) and per assign->relève SLA
+            const clientName = (
+              (r["Nom du client MBS"] || r["Client"] || "N/A") + ""
+            )
+              .toString()
+              .trim()
+              .toLowerCase();
+            // main SLA bucket (no client KPI row requested, so we skip tracking here)
+
+            // assign->relève SLA bucket (if assignH computed)
+            if (assignH !== null) {
+              if (assignH <= 6) stats.clientsBySLAAssign.k6.add(clientName);
+              else if (assignH <= 12)
+                stats.clientsBySLAAssign.k12.add(clientName);
+              else if (assignH <= 24)
+                stats.clientsBySLAAssign.k24.add(clientName);
+              else stats.clientsBySLAAssign.kOver.add(clientName);
+            }
 
             stats.locs[loc] = (stats.locs[loc] || 0) + 1;
             stats.causes[cause] = (stats.causes[cause] || 0) + 1;
             stats.equipes[eq] = (stats.equipes[eq] || 0) + 1;
 
             processedData.push({
-                ID: r["Numéro de Requête"] || r["ID"],
-                Ligne: r["Ligne fixe"] || "N/A",
-                Client: r["Nom du client MBS"] || "N/A",
-                Ville: loc,
-                Cause: cause,
-                Equipe: eq,
-                Heures: h.toFixed(1),
-                SLA: sla,
-                Details: r
+              ID: r["Numéro de Requête"] || r["ID"],
+              Ligne: r["Ligne fixe"] || "N/A",
+              Client: r["Nom du client MBS"] || "N/A",
+              Ville: loc,
+              Cause: cause,
+              Equipe: eq,
+              Heures: h.toFixed(1),
+              AssignToRel: assignH !== null ? assignH.toFixed(1) : null,
+              SLA: sla,
+              Details: r,
             });
+          }
+        });
+        updateUI(stats);
+      }
+
+      function updateUI(s) {
+        document.getElementById("dashContent").style.display = "block";
+        document.getElementById("actionBtns").style.display = "flex";
+        document.getElementById("k6").innerText = s.k6;
+        document.getElementById("k12").innerText = s.k12;
+        document.getElementById("k24").innerText = s.k24;
+        document.getElementById("kOver").innerText = s.kOver;
+        // Clients per SLA based on assign->relève
+        const miss = s.assignMissingCount || 0;
+        if (miss === 0) {
+          // No missing assign values: show incident counts so totals match
+          document.getElementById("kCAssign6").innerText = s.assignInc.k6 || 0;
+          document.getElementById("kCAssign12").innerText =
+            s.assignInc.k12 || 0;
+          document.getElementById("kCAssign24").innerText =
+            s.assignInc.k24 || 0;
+          document.getElementById("kCAssignOver").innerText =
+            s.assignInc.kOver || 0;
+        } else {
+          // Some assign values missing: show unique client counts and indicate missing
+          document.getElementById("kCAssign6").innerText =
+            `${s.clientsBySLAAssign.k6.size} (+${miss} missing)`;
+          document.getElementById("kCAssign12").innerText =
+            `${s.clientsBySLAAssign.k12.size} (+${miss} missing)`;
+          document.getElementById("kCAssign24").innerText =
+            `${s.clientsBySLAAssign.k24.size} (+${miss} missing)`;
+          document.getElementById("kCAssignOver").innerText =
+            `${s.clientsBySLAAssign.kOver.size} (+${miss} missing)`;
         }
-    });
-    updateUI(stats);
-}
 
-function updateUI(s) {
-    document.getElementById('dashContent').style.display = 'block';
-    document.getElementById('actionBtns').style.display = 'flex';
-    document.getElementById('k6').innerText = s.k6;
-    document.getElementById('k12').innerText = s.k12;
-    document.getElementById('k24').innerText = s.k24;
-    document.getElementById('kOver').innerText = s.kOver;
-
-    document.getElementById('tBody').innerHTML = processedData.map((d, i) => `
+        document.getElementById("tBody").innerHTML = processedData
+          .map(
+            (d, i) => `
         <tr onclick="toggleDetails(${i})" style="cursor:pointer">
             <td><i class="fas fa-chevron-right text-muted" id="icon-${i}"></i></td>
             <td><small class="fw-bold">${d.ID}</small></td>
@@ -179,170 +461,392 @@ function updateUI(s) {
             <td><div style="max-width:120px" class="text-truncate">${d.Client}</div></td>
             <td class="d-none d-md-table-cell">${d.Ville}</td>
             <td class="fw-bold">${d.Heures}h</td>
+            <td class="fw-bold">${d.AssignToRel ? d.AssignToRel + "h" : "N/A"}</td>
             <td><span class="badge ${getCol(d.SLA)}">${d.SLA}</span></td>
         </tr>
         <tr id="details-${i}" class="incident-details">
-            <td colspan="7">
+            <td colspan="8">
                 <div class="p-3 border rounded bg-white shadow-sm mx-1 small">
                     <div class="row">
-                        <div class="col-md-4"><b>Equipe:</b> ${d.Equipe}<br><b>Contact:</b> ${d.Details["CONTACT CLIENT 1"] || 'N/A'}</div>
-                        <div class="col-md-4"><b>Cause:</b> ${d.Cause}<br><b>Action:</b> ${d.Details["Action de Résolution"] || 'N/A'}</div>
+                        <div class="col-md-4"><b>Equipe:</b> ${d.Equipe}<br><b>Contact:</b> ${d.Details["CONTACT CLIENT 1"] || "N/A"}</div>
+                        <div class="col-md-4"><b>Cause:</b> ${d.Cause}<br><b>Action:</b> ${d.Details["Action de Résolution"] || "N/A"}</div>
                         <div class="col-md-4"><b>Signalé:</b> ${d.Details["Date de signalisation"]}<br><b>Résolu:</b> ${d.Details["Date et heure de résolution"]}</div>
                     </div>
                 </div>
             </td>
-        </tr>`).join('');
-    renderCharts(s);
-}
+        </tr>`,
+          )
+          .join("");
+        renderCharts(s);
+      }
 
-function toggleDetails(i) {
-    const row = document.getElementById(`details-${i}`);
-    const icon = document.getElementById(`icon-${i}`);
-    const isVisible = row.style.display === 'table-row';
-    row.style.display = isVisible ? 'none' : 'table-row';
-    icon.className = isVisible ? 'fas fa-chevron-right text-muted' : 'fas fa-chevron-down text-primary';
-}
+      function toggleDetails(i) {
+        const row = document.getElementById(`details-${i}`);
+        const icon = document.getElementById(`icon-${i}`);
+        const isVisible = row.style.display === "table-row";
+        row.style.display = isVisible ? "none" : "table-row";
+        icon.className = isVisible
+          ? "fas fa-chevron-right text-muted"
+          : "fas fa-chevron-down text-primary";
+      }
 
-function getCol(s) {
-    return s==="<6h" ? "bg-6h" : s==="6-12h" ? "bg-12h" : s==="12-24h" ? "bg-24h" : "bg-over";
-}
-function renderCharts(s) {
-    const commonOpts = { maintainAspectRatio: false, plugins: {legend:{display:false}} };
-    
-    const setup = (id, dataObj, color) => {
-        if(charts[id]) charts[id].destroy();
-        const sorted = Object.entries(dataObj).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        charts[id] = new Chart(document.getElementById(id), {
-            type: 'bar',
-            data: { labels: sorted.map(x=>x[0]), datasets: [{data: sorted.map(x=>x[1]), backgroundColor: color}] },
-            options: commonOpts
-        });
-    };
-    
-    setup('chartLoc', s.locs, '#005bac');
-    setup('chartCause', s.causes, '#ff9900');
-    setup('chartEquipe', s.equipes, '#6f42c1');
+      function getCol(s) {
+        return s === "<6h"
+          ? "bg-6h"
+          : s === "6-12h"
+            ? "bg-12h"
+            : s === "12-24h"
+              ? "bg-24h"
+              : "bg-over";
+      }
+      function renderCharts(s) {
+        const commonOpts = {
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+        };
 
-    if(charts.pie) charts.pie.destroy();
-    
-    const total = s.k6 + s.k12 + s.k24 + s.kOver;
+        // Show ALL villes (no aggregation). Adjust canvas height and tick rotation
+        // so labels don't overlap even with many cities.
+        const setup = (id, dataObj, color, extraOpts = {}) => {
+          if (charts[id]) charts[id].destroy();
+          const sorted = Object.entries(dataObj).sort((a, b) => b[1] - a[1]);
+          const labels = sorted.map((x) => x[0]);
+          const data = sorted.map((x) => x[1]);
 
-    charts.pie = new Chart(document.getElementById('chartPie'), {
-        type: 'doughnut',
-        data: { 
+          // If chart is localisation, give more vertical space and force
+          // ticks to show (no auto-skip), rotating them to avoid overlap.
+          if (id === "chartLoc") {
+            try {
+              const canvas = document.getElementById(id);
+              // Height grows with label count; cap to avoid enormous sizes.
+              const computedHeight = Math.min(120 + labels.length * 14, 1600);
+              canvas.style.height = computedHeight + "px";
+            } catch (e) {
+              /* ignore */
+            }
+          }
+
+          const axisOpts =
+            id === "chartLoc"
+              ? {
+                  scales: {
+                    x: {
+                      ticks: {
+                        autoSkip: false,
+                        maxRotation: 90,
+                        minRotation: 45,
+                      },
+                      grid: { display: false },
+                    },
+                    y: { beginAtZero: true },
+                  },
+                  plugins: {
+                    tooltip: {
+                      callbacks: {
+                        label: (c) => `Volume : ${c.parsed} incidents`,
+                      },
+                    },
+                  },
+                }
+              : { scales: { y: { beginAtZero: true } } };
+
+          charts[id] = new Chart(document.getElementById(id), {
+            type: "bar",
+            data: { labels, datasets: [{ data, backgroundColor: color }] },
+            options: Object.assign({}, commonOpts, axisOpts, extraOpts),
+          });
+        };
+
+        // For localisations, pass the full list so every city appears.
+        setup("chartLoc", s.locs, "#005bac");
+        setup("chartCause", s.causes, "#ff9900");
+        setup("chartEquipe", s.equipes, "#6f42c1");
+
+        if (charts.pie) charts.pie.destroy();
+
+        const total = s.k6 + s.k12 + s.k24 + s.kOver;
+
+        charts.pie = new Chart(document.getElementById("chartPie"), {
+          type: "doughnut",
+          data: {
             labels: [
-                `< 6h : ${((s.k6/total)*100).toFixed(1)}%`,
-                `6-12h : ${((s.k12/total)*100).toFixed(1)}%`,
-                `12-24h : ${((s.k24/total)*100).toFixed(1)}%`,
-                `> 24h : ${((s.kOver/total)*100).toFixed(1)}%`
-            ], 
-            datasets:[{
-                data:[s.k6, s.k12, s.k24, s.kOver], 
-                backgroundColor:['#1b5e20','#2e7d32','#f9a825','#c62828'],
-                borderWidth: 2
-            }] 
-        },
-        options: { 
+              `< 6h : ${((s.k6 / total) * 100).toFixed(1)}%`,
+              `6-12h : ${((s.k12 / total) * 100).toFixed(1)}%`,
+              `12-24h : ${((s.k24 / total) * 100).toFixed(1)}%`,
+              `> 24h : ${((s.kOver / total) * 100).toFixed(1)}%`,
+            ],
+            datasets: [
+              {
+                data: [s.k6, s.k12, s.k24, s.kOver],
+                backgroundColor: ["#1b5e20", "#2e7d32", "#f9a825", "#c62828"],
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: true,
-                    position: window.innerWidth < 768 ? 'bottom' : 'right',
-                    labels: {
-                        boxWidth: 15,
-                        padding: 15,
-                        font: { size: 12, weight: 'bold' },
-                        color: '#333'
-                    }
+              legend: {
+                display: true,
+                position: window.innerWidth < 768 ? "bottom" : "right",
+                labels: {
+                  boxWidth: 15,
+                  padding: 15,
+                  font: { size: 12, weight: "bold" },
+                  color: "#333",
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(c) {
-                            return `Volume : ${c.parsed} incidents`;
-                        }
-                    }
-                }
-            }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (c) {
+                    return `Volume : ${c.parsed} incidents`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+      function filterTable() {
+        let q = document.getElementById("searchTable").value.toLowerCase();
+        const rows = document.querySelectorAll(
+          `#dataTable tbody tr:not(.incident-details)`,
+        );
+        processedData.forEach((d, i) => {
+          let match =
+            d.Ligne.toString().includes(q) ||
+            d.Client.toLowerCase().includes(q);
+          rows[i].style.display = match ? "table-row" : "none";
+          document.getElementById(`details-${i}`).style.display = "none";
+        });
+      }
+
+      function sendToGmail() {
+        const body = encodeURIComponent(
+          `Résumé :\nSLA < 6h : ${document.getElementById("k6").innerText}\nHors Délai : ${document.getElementById("kOver").innerText}`,
+        );
+        window.open(
+          `https://mail.google.com/mail/?view=cm&fs=1&su=Reporting_FTECH&body=${body}`,
+          "_blank",
+        );
+      }
+
+      function exportExcel() {
+        const ws = XLSX.utils.json_to_sheet(
+          processedData.map(({ Details, ...rest }) => rest),
+        );
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Analyse");
+        XLSX.writeFile(wb, "Reporting_FTECH.xlsx");
+      }
+      function generatePPT() {
+        let PptxGen = window.PptxGenJS || window.pptxgen;
+        if (!PptxGen) {
+          alert("Erreur : Bibliothèque PPTX non chargée.");
+          return;
         }
-    });
-}
-function filterTable() {
-    let q = document.getElementById('searchTable').value.toLowerCase();
-    const rows = document.querySelectorAll(`#dataTable tbody tr:not(.incident-details)`);
-    processedData.forEach((d, i) => {
-        let match = d.Ligne.toString().includes(q) || d.Client.toLowerCase().includes(q);
-        rows[i].style.display = match ? 'table-row' : 'none';
-        document.getElementById(`details-${i}`).style.display = 'none';
-    });
-}
 
-function sendToGmail() {
-    const body = encodeURIComponent(`Résumé :\nSLA < 6h : ${document.getElementById('k6').innerText}\nHors Délai : ${document.getElementById('kOver').innerText}`);
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=Reporting_FTECH&body=${body}`, '_blank');
-}
+        let pres = new PptxGen();
+        pres.layout = "LAYOUT_WIDE";
 
-function exportExcel() {
-    const ws = XLSX.utils.json_to_sheet(processedData.map(({Details, ...rest}) => rest));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Analyse");
-    XLSX.writeFile(wb, "Reporting_FTECH.xlsx");
-}
-function generatePPT() {
-    let PptxGen = window.PptxGenJS || window.pptxgen;
-    if (!PptxGen) {
-        alert("Erreur : Bibliothèque PPTX non chargée.");
-        return;
-    }
-    
-    let pres = new PptxGen();
-    pres.layout = 'LAYOUT_WIDE';
+        // --- SLIDE 1 : TITRE ET KPI ---
+        let slide1 = pres.addSlide();
+        slide1.addText("REPORTING PERFORMANCE MAINTENANCE FTECH", {
+          x: 0.5,
+          y: 0.5,
+          w: "90%",
+          fontSize: 28,
+          color: "005bac",
+          bold: true,
+          align: "center",
+        });
 
-    // --- SLIDE 1 : TITRE ET KPI ---
-    let slide1 = pres.addSlide();
-    slide1.addText("REPORTING PERFORMANCE MAINTENANCE FTECH", { x:0.5, y:0.5, w:'90%', fontSize:28, color:'005bac', bold:true, align:'center' });
-    
-    const kpis = [
-        { label: "SLA < 6H", val: document.getElementById('k6').innerText, col: '1b5e20' },
-        { label: "6H - 12H", val: document.getElementById('k12').innerText, col: '2e7d32' },
-        { label: "12H - 24H", val: document.getElementById('k24').innerText, col: 'f9a825' },
-        { label: "HORS DÉLAI", val: document.getElementById('kOver').innerText, col: 'c62828' }
-    ];
+        const kpis = [
+          {
+            label: "SLA < 6H",
+            val: document.getElementById("k6").innerText,
+            col: "1b5e20",
+          },
+          {
+            label: "6H - 12H",
+            val: document.getElementById("k12").innerText,
+            col: "2e7d32",
+          },
+          {
+            label: "12H - 24H",
+            val: document.getElementById("k24").innerText,
+            col: "f9a825",
+          },
+          {
+            label: "HORS DÉLAI",
+            val: document.getElementById("kOver").innerText,
+            col: "c62828",
+          },
+        ];
 
-    kpis.forEach((k, i) => {
-        slide1.addShape(pres.ShapeType.rect, { x: 0.5 + (i * 2.4), y: 1.5, w: 2.2, h: 1.2, fill: { color: k.col } });
-        slide1.addText(k.label, { x: 0.5 + (i * 2.4), y: 1.7, w: 2.2, fontSize: 12, color: 'ffffff', align: 'center' });
-        slide1.addText(k.val, { x: 0.5 + (i * 2.4), y: 2.1, w: 2.2, fontSize: 24, color: 'ffffff', bold: true, align: 'center' });
-    });
+        kpis.forEach((k, i) => {
+          slide1.addShape(pres.ShapeType.rect, {
+            x: 0.5 + i * 2.4,
+            y: 1.5,
+            w: 2.2,
+            h: 1.2,
+            fill: { color: k.col },
+          });
+          slide1.addText(k.label, {
+            x: 0.5 + i * 2.4,
+            y: 1.7,
+            w: 2.2,
+            fontSize: 12,
+            color: "ffffff",
+            align: "center",
+          });
+          slide1.addText(k.val, {
+            x: 0.5 + i * 2.4,
+            y: 2.1,
+            w: 2.2,
+            fontSize: 24,
+            color: "ffffff",
+            bold: true,
+            align: "center",
+          });
+        });
 
-    // --- SLIDE 2 : LOCALISATION ET CAUSES ---
-    let slide2 = pres.addSlide();
-    slide2.addText("ANALYSE DES VOLUMES ET CAUSES", { x:0.5, y:0.3, fontSize:20, color:'005bac', bold:true });
-    
-    const imgLoc = document.getElementById('chartLoc').toDataURL("image/png");
-    const imgCause = document.getElementById('chartCause').toDataURL("image/png");
+        // --- deuxième rangée : Assign→Relève (clients/incidents) ---
+        const assignKpis = [
+          {
+            label: "Assign→Relève <6h",
+            val: document.getElementById("kCAssign6").innerText,
+            col: "1b5e20",
+          },
+          {
+            label: "Assign→Relève 6-12h",
+            val: document.getElementById("kCAssign12").innerText,
+            col: "2e7d32",
+          },
+          {
+            label: "Assign→Relève 12-24h",
+            val: document.getElementById("kCAssign24").innerText,
+            col: "f9a825",
+          },
+          {
+            label: "Assign→Relève >24h",
+            val: document.getElementById("kCAssignOver").innerText,
+            col: "c62828",
+          },
+        ];
 
-    slide2.addText("Par Localisation", { x:0.5, y:0.8, fontSize:12, bold:true });
-    slide2.addImage({ data: imgLoc, x:0.5, y:1.2, w:4.5, h:2.5 });
+        assignKpis.forEach((k, i) => {
+          slide1.addShape(pres.ShapeType.rect, {
+            x: 0.5 + i * 2.4,
+            y: 3.0,
+            w: 2.2,
+            h: 1.0,
+            fill: { color: k.col },
+          });
+          slide1.addText(k.label, {
+            x: 0.5 + i * 2.4,
+            y: 3.05,
+            w: 2.2,
+            fontSize: 10,
+            color: "ffffff",
+            align: "center",
+          });
+          slide1.addText(k.val, {
+            x: 0.5 + i * 2.4,
+            y: 3.4,
+            w: 2.2,
+            fontSize: 18,
+            color: "ffffff",
+            bold: true,
+            align: "center",
+          });
+        });
 
-    slide2.addText("Par Causes Principales", { x:5.5, y:0.8, fontSize:12, bold:true });
-    slide2.addImage({ data: imgCause, x:5.5, y:1.2, w:4.5, h:2.5 });
+        // --- SLIDE 2 : LOCALISATION ET CAUSES ---
+        let slide2 = pres.addSlide();
+        slide2.addText("ANALYSE DES VOLUMES ET CAUSES", {
+          x: 0.5,
+          y: 0.3,
+          fontSize: 20,
+          color: "005bac",
+          bold: true,
+        });
 
-    // --- SLIDE 3 : EQUIPES ET SLA % ---
-    let slide3 = pres.addSlide();
-    slide3.addText("PERFORMANCE ÉQUIPES ET RÉPARTITION SLA", { x:0.5, y:0.3, fontSize:20, color:'005bac', bold:true });
+        const imgLoc = document
+          .getElementById("chartLoc")
+          .toDataURL("image/png");
+        const imgCause = document
+          .getElementById("chartCause")
+          .toDataURL("image/png");
 
-    const imgEq = document.getElementById('chartEquipe').toDataURL("image/png");
-    const imgPie = document.getElementById('chartPie').toDataURL("image/png");
+        slide2.addText("Par Localisation", {
+          x: 0.5,
+          y: 0.8,
+          fontSize: 12,
+          bold: true,
+        });
+        slide2.addImage({ data: imgLoc, x: 0.5, y: 1.2, w: 4.5, h: 2.5 });
 
-    slide3.addText("Volume par Équipe", { x:0.5, y:0.8, fontSize:12, bold:true });
-    slide3.addImage({ data: imgEq, x:0.5, y:1.2, w:4.5, h:3.0 });
+        slide2.addText("Par Causes Principales", {
+          x: 5.5,
+          y: 0.8,
+          fontSize: 12,
+          bold: true,
+        });
+        slide2.addImage({ data: imgCause, x: 5.5, y: 1.2, w: 4.5, h: 2.5 });
 
-    slide3.addText("Répartition SLA (%)", { x:6.0, y:0.8, fontSize:12, bold:true });
-    slide3.addImage({ data: imgPie, x:6.0, y:1.2, w:3.5, h:3.5 });
+        // --- SLIDE 3 : EQUIPES ET SLA % ---
+        let slide3 = pres.addSlide();
+        slide3.addText("PERFORMANCE ÉQUIPES ET RÉPARTITION SLA", {
+          x: 0.5,
+          y: 0.3,
+          fontSize: 20,
+          color: "005bac",
+          bold: true,
+        });
 
-    // Sauvegarde avec nom dynamique
-    pres.writeFile({ fileName: `Reporting_FTECH_${moment().format('DD_MM_YYYY')}.pptx` });
-}
-</script>
-</body>
+        const imgEq = document
+          .getElementById("chartEquipe")
+          .toDataURL("image/png");
+        const imgPie = document
+          .getElementById("chartPie")
+          .toDataURL("image/png");
+
+        slide3.addText("Volume par Équipe", {
+          x: 0.5,
+          y: 0.8,
+          fontSize: 12,
+          bold: true,
+        });
+        slide3.addImage({ data: imgEq, x: 0.5, y: 1.2, w: 4.5, h: 3.0 });
+
+        slide3.addText("Répartition SLA (%)", {
+          x: 6.0,
+          y: 0.8,
+          fontSize: 12,
+          bold: true,
+        });
+        slide3.addImage({ data: imgPie, x: 6.0, y: 1.2, w: 3.5, h: 3.5 });
+
+        // Sauvegarde avec nom dynamique
+        pres.writeFile({
+          fileName: `Reporting_FTECH_${moment().format("DD_MM_YYYY")}.pptx`,
+        });
+      }
+      // Attach file input handler robustly
+      try {
+        const _fileIn = document.getElementById("fileIn");
+        if (_fileIn && typeof handleFile === "function") {
+          _fileIn.addEventListener("change", handleFile);
+        } else if (_fileIn) {
+          _fileIn.addEventListener("change", function (e) {
+            if (typeof handleFile === "function") handleFile(e);
+            else console.error("handleFile not defined at bind time");
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    </script>
+  </body>
 </html>
